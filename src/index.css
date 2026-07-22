@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+body {
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.kanban-board {
+    max-width: 50rem;
+    margin: 2em auto;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+h2 {
+    font-size: 1.4rem;
+}
+
+.dragging {
+    opacity: 0.4;
+}
+
+.task_item {
+    box-sizing: border-box;
+}
+
+.over {
+    background: #525252;
+    outline: 0.1em dashed #fff;
+}
