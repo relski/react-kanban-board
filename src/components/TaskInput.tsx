@@ -1,11 +1,12 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type Dispatch, type SetStateAction } from "react";
 
 interface TaskInputProp {
   addTask: (text: string) => void;
+  taskInput: string;
+  setTaskInput: Dispatch<SetStateAction<string>>;
 }
 
-export function TaskInput({ addTask }: TaskInputProp) {
-  const [taskInput, setTaskInput] = useState("");
+export function TaskInput({ addTask, taskInput, setTaskInput }: TaskInputProp) {
   const [showForm, setShowForm] = useState<boolean>(false);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {

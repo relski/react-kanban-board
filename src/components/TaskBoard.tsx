@@ -1,5 +1,6 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { TaskColumn } from "./TaskColumn";
+import useLocalStorage from "../utils/useLocalStorage";
 
 export interface Task {
   id: string;
@@ -8,7 +9,7 @@ export interface Task {
 }
 
 export function TaskBoard() {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useLocalStorage('taskListStorage',[]);
 
   const taskColumns = [
     {id: 1, title: "To-do", status: "todo"},

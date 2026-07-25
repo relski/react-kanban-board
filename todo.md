@@ -5,8 +5,8 @@
 
 ## Additional Features
 - [x] Delete task feature
-- [] Rewrite task text
+- [x] Rewrite task text
 - [] Add drag position preview if dragging above or below the target drop
-- [] Add local storage function
+- [x] Add local storage function
 - [] Add priority indicator
 - [] Maybe add tag/label feature to each task

@@ -1,6 +1,6 @@
 import { useState, type DragEvent, type SetStateAction, type Dispatch } from "react";
 import { TaskInput } from "./TaskInput";
-import type { Task } from "./TaskBoard.js";
+import type { Task } from "./TaskBoard";
 
 interface TaskColumnProp {
   title: string;
@@ -13,8 +13,9 @@ interface TaskColumnProp {
 
 export function TaskColumn({ title, status, taskList, addTask, moveTask, setTasks }: TaskColumnProp ) {
   const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
-  const [overIdx, setOverIdx] = useState<number | null>(null);
-  const [isEditingTask, setIsEditingTask] = useState<boolean>(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editInput, setEditInput] = useState("");
+  const [taskInput, setTaskInput] = useState("");
 
   const taskItemStyles: string =
     "flex justify-between bg-zinc-200 text-zinc-600 p-3 border-t-indigo-300 border-t-2 my-1 drop-shadow-zinc-400 drop-shadow-xs";
@@ -25,7 +26,7 @@ export function TaskColumn({ title, status, taskList, addTask, moveTask, setTask
     if (!taskId) return;
     moveTask(taskId, status);
     setDraggingIdx(null);
-    setOverIdx(null);
+    setEditingTaskId(null);
   };
 
   const deleteTask = (taskId: string) => {
@@ -33,73 +34,82 @@ export function TaskColumn({ title, status, taskList, addTask, moveTask, setTask
   }
 
   const editTask = (taskId: string, text: string) => {
-    const currentText = text;
-    setTasks(prev => prev.map(task => task.id === taskId ? {...task, text: currentText}: task));
-    setIsEditingTask((prev) => !prev);
-  }
-
-  const showEditInput = () => {
-    setIsEditingTask((prev) => !prev);
+    setTasks(prev => prev.map(task => 
+      task.id === taskId ? { ...task, text } : task
+    ));
+    setEditingTaskId(null);
+    setEditInput("");
   }
 
   return (
-    <>
-      <div 
-        className="task_column flex flex-col p-4 bg-zinc-100 min-w-2 shadow"
-        data-coltype={status}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-      >
-        <div className="flex justify-between">
-          <h2 className="block mb-2">{title}</h2>
-          <h2 className="block mb-2">{taskList.length}</h2>
-        </div>
-        {taskList.length > 0 ? (
-          taskList.map((item, idx) => (
-            <div
-              className={`task_item 
-              ${taskItemStyles}
-              ${draggingIdx === idx ? "dragging" : ""}
-              ${overIdx === idx ? "over" : ""}
-              `}
-              key={item.id}
-              draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData("taskId", item.id);
-                setDraggingIdx(idx);
-              }}
-              onDragEnd={() => {
-                setDraggingIdx(null);
-                setOverIdx(null);
-              }}
-              onClick={() => showEditInput()}
-            >
-              {isEditingTask ? 
+    <div
+      className="task_column flex flex-col p-4 bg-zinc-100 min-w-2 shadow"
+      data-coltype={status}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDrop}
+    >
+      <div className="flex justify-between">
+        <h2 className="block mb-2">{title}</h2>
+        <h2 className="block mb-2">{taskList.length}</h2>
+      </div>
+      {taskList.length > 0 ? (
+        taskList.map((item, idx) => (
+          <div
+            className={`task_item
+            ${taskItemStyles}
+            ${draggingIdx === idx ? "dragging" : ""}
+            `}
+            key={item.id}
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.setData("taskId", item.id);
+              setDraggingIdx(idx);
+            }}
+            onDragEnd={() => {
+              setDraggingIdx(null);
+              setEditingTaskId(null);
+            }}
+            onClick={() => {
+              setEditingTaskId(item.id);
+              setEditInput(item.text);
+            }}
+          >
+            {editingTaskId === item.id ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  editTask(item.id, editInput);
+                }}
+                className="flex-1"
+              >
                 <input
                   type="text"
-                  value={item.text}
-                  onChange={() => editTask(item.text, item.id)}
+                  value={editInput}
+                  onChange={(e) => setEditInput(e.target.value)}
                   autoFocus
+                  className="w-full"
                 />
-               : item.text}
-              {/* Add edit icon here upon hover
-                  Once clicked, change element to input field
-                  Take current text as input value
-                  New text will replace this tasks text
-                  Update state array again? */}
-              <button 
-                onClick={() => deleteTask(item.id)}
-                className="text-zinc-300 hover:text-red-600 hover:cursor-pointer"
-              >[X]</button>
-            </div>
-          ))
-        ) : (
-          <i className="text-zinc-400">You have no tasks available</i>
-        )}
-        {status === "todo" ? (
-          <TaskInput addTask={addTask} />
-        ) : null}
-      </div>
-    </>
+              </form>
+            ) : (
+              <span className="flex-1">{item.text}</span>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteTask(item.id);
+              }}
+              className="text-zinc-300 hover:text-red-600 hover:cursor-pointer ml-2"
+            >
+              [X]
+            </button>
+          </div>
+        ))
+      ) : (
+        <i className="text-zinc-400">You have no tasks available</i>
+      )}
+      {status === "todo" ? (
+        <TaskInput addTask={addTask} taskInput={taskInput} setTaskInput={setTaskInput} />
+      ) : null}
+    </div>
   );
 }
